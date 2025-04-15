@@ -13,9 +13,8 @@ const poppins = Poppins({
     display: 'swap',
 })
 
-const ChatLists = ({ setUserName, setIsModalOpen }: {
-    setUserName: React.Dispatch<React.SetStateAction<string>>
-
+const ChatLists = ({ setIsModalOpen, setReceiver }: {
+    setReceiver: React.Dispatch<React.SetStateAction<string>>
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>
 }) => {
 
@@ -56,7 +55,7 @@ const ChatLists = ({ setUserName, setIsModalOpen }: {
             </div>
             {/* user list */}
             <div className='mt-10 flex flex-col gap-y-5 '>
-                <ChatUserList setUserName={setUserName} />
+                <ChatUserList setReceiver={setReceiver} />
             </div>
 
 

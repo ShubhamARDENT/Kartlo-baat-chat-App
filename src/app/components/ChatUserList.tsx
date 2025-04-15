@@ -4,12 +4,12 @@ import React, { useEffect, useState } from 'react'
 
 interface IUser {
     username: string;
-    id: number;    
+    id: number;
 }
 
-const ChatUserList = ({ isModalOpen, setUserName }: {
+const ChatUserList = ({ isModalOpen, setReceiver }: {
     isModalOpen?: boolean
-    setUserName: React.Dispatch<React.SetStateAction<string>>
+    setReceiver: React.Dispatch<React.SetStateAction<string>>
 }) => {
 
     const client = axios.create({
@@ -20,9 +20,9 @@ const ChatUserList = ({ isModalOpen, setUserName }: {
     const [dummyUserData, setDummyUserData] = useState<IUser[]>()
 
     useEffect(() => {
-       client.get('').then((response) => setDummyUserData(response.data))
+        client.get('').then((response) => setDummyUserData(response.data))
     }, [])
-    
+
 
     return (
         <div className='flex flex-col justify-between h-full'>
@@ -33,7 +33,7 @@ const ChatUserList = ({ isModalOpen, setUserName }: {
                             cursor-pointer hover:bg-[#002670] px-2 py-2`}
                         onClick={() => {
                             if (!isModalOpen) {
-                                setUserName(user.username)
+                                setReceiver(user.username)
                             }
                         }}>
                         {isModalOpen && (

@@ -20,38 +20,45 @@ interface Props {
     mode?: "room" | "private";
 }
 
-const MainChat = ({ userName, receiver }: Props) => {
+const MainChat = ({ userName, receiver, }: Props) => {
     const [input, setInput] = useState("");
     const [messages, setMessages] = useState<IMessages[]>([]);
     const messageEndRef = useRef<HTMLDivElement | null>(null);
     const socketRef = useRef<WebSocket | null>(null);
 
     useEffect(() => {
-        // const socket = new WebSocket(`ws://http://127.0.0.1:8000//ws/private/${userName}/${receiver}`);
-        const socket = new WebSocket(`ws://127.0.0.1:8000/ws/private/${userName}/${receiver}`);
+        const socket = new WebSocket(`ws://localhost:8000/ws/private/${userName}/${receiver}`);
 
         socket.onopen = () => {
             console.log("Connected to private chat");
         };
 
         socket.onmessage = (event) => {
-            messages(event.data);
+            setMessages((prev) => [...prev, { others: event.data }]);
         };
+
 
         socket.onerror = (err) => {
             console.error("WebSocket error:", err);
         };
-
-        socket.onclose = () => {
-            console.log("Disconnected from private chat");
+        socket.onclose = (event) => {
+            console.warn("WebSocket closed", {
+                code: event.code,
+                reason: event.reason,
+                wasClean: event.wasClean,
+            });
         };
-
+        socket.onerror = (event) => {
+            console.error("WebSocket error:", event);
+            console.log("WebSocket readyState:", socket.readyState);
+            console.log("WebSocket URL:", socket.url);
+        };
         socketRef.current = socket;
 
         return () => {
             socket.close();
         };
-    }, [userName,receiver]);
+    }, [receiver]);
 
     const sendMessage = () => {
         if (input.trim() === "") return;
@@ -78,7 +85,7 @@ const MainChat = ({ userName, receiver }: Props) => {
             <div className="flex items-center justify-between px-5 py-2 border-b border-gray-400">
                 <div className="flex items-center gap-5">
                     <img src="/images/profile.png" alt="profile" className="w-12" />
-                    <span className={`text-xl ${poppins.className}`}>{userName}</span>
+                    <span className={`text-xl ${poppins.className}`}>{receiver}</span>
                     <span className="h-4 w-4 bg-green-500 border-2 border-white rounded-full" />
                 </div>
                 <Info className="cursor-pointer" />
