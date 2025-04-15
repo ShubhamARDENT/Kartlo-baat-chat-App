@@ -1,89 +1,111 @@
-"use client"
-import React, { useEffect, useRef, useState } from 'react'
-import { Info, Send } from 'lucide-react'
-import { Poppins } from 'next/font/google'
-
+"use client";
+import React, { useEffect, useRef, useState } from "react";
+import { Info, Send } from "lucide-react";
+import { Poppins } from "next/font/google";
 
 const poppins = Poppins({
-    subsets: ['latin'],
+    subsets: ["latin"],
     weight: "400",
-})
-
+});
 
 interface IMessages {
-    myText?: string,
-    // * include others also 
-    others?: string
+    myText?: string;
+    others?: string;
 }
 
-const MainChat = ({ userName }: { userName: string }) => {
+interface Props {
+    userName: string;
+    room?: string; // for public room
+    receiver?: string; // for private chat
+    mode?: "room" | "private";
+}
 
-    const [input, setInput] = useState("")
-    const [messages, setMessages] = useState<IMessages[]>([])
-
-
-
-    const messageEndRef = useRef<HTMLDivElement | null>(null)
-
+const MainChat = ({ userName, receiver }: Props) => {
+    const [input, setInput] = useState("");
+    const [messages, setMessages] = useState<IMessages[]>([]);
+    const messageEndRef = useRef<HTMLDivElement | null>(null);
+    const socketRef = useRef<WebSocket | null>(null);
 
     useEffect(() => {
-        messageEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
-    }, [messages])
+        // const socket = new WebSocket(`ws://http://127.0.0.1:8000//ws/private/${userName}/${receiver}`);
+        const socket = new WebSocket(`ws://127.0.0.1:8000/ws/private/${userName}/${receiver}`);
+
+        socket.onopen = () => {
+            console.log("Connected to private chat");
+        };
+
+        socket.onmessage = (event) => {
+            messages(event.data);
+        };
+
+        socket.onerror = (err) => {
+            console.error("WebSocket error:", err);
+        };
+
+        socket.onclose = () => {
+            console.log("Disconnected from private chat");
+        };
+
+        socketRef.current = socket;
+
+        return () => {
+            socket.close();
+        };
+    }, [userName,receiver]);
 
     const sendMessage = () => {
-        // for emply msg
-        if (input.trim() === "") return
-        setMessages((prev) => [...prev, { myText: input }])
-        setInput("")
-    }
+        if (input.trim() === "") return;
+        const socket = socketRef.current;
+        if (socket?.readyState === WebSocket.OPEN) {
+            socket.send(input);
+        }
 
-    const RecievedMessage = (text: string) => {
-        setMessages((prev) => [...prev, { others: text }])
-    }
+        setMessages((prev) => [...prev, { myText: input }]);
+        setInput("");
+    };
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            RecievedMessage("hello from other side")
-        }, 1000)
-
-        return () => clearTimeout(timer)
-    },[input])
+        messageEndRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "end",
+            inline: "nearest",
+        });
+    }, [messages]);
 
     return (
-        <div className='bg-gray-200 h-[100vh] w-full relative flex flex-col'>
-            {/* chat header */}
-            <div className='flex items-center justify-between  px-5 py-2 border-b-1 border-gray-400 border-solid'>
-                <div className='flex items-center gap-5'>
-                    <img src="/images/profile.png" alt="profile-photo" className='w-12' />
+        <div className="bg-gray-200 h-[100vh] w-full relative flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-2 border-b border-gray-400">
+                <div className="flex items-center gap-5">
+                    <img src="/images/profile.png" alt="profile" className="w-12" />
                     <span className={`text-xl ${poppins.className}`}>{userName}</span>
-                    <span className=" h-4 w-4 bg-green-500 border-2 border-white rounded-full" />
+                    <span className="h-4 w-4 bg-green-500 border-2 border-white rounded-full" />
                 </div>
-                <div>
-                    <Info className='cursor-pointer' />
-                </div>
+                <Info className="cursor-pointer" />
             </div>
-            {/* chat messages */}
-            <div className='flex-1 overflow-y-auto space-y-2 px-4 py-2 custom-scroll flex-col '>
-                {messages.map((Message, index) => (
-                    <div ref={messageEndRef}
+
+            {/* Chat Messages */}
+            <div className="flex-1 overflow-y-auto space-y-2 px-4 py-2 custom-scroll flex-col">
+                {messages.map((msg, index) => (
+                    <div
+                        ref={index === messages.length - 1 ? messageEndRef : null}
                         key={index}
-                        className={`flex py-20 ${Message.others ? "justify-start" : "justify-end"} mr-4 `}>
-                        {Message.others ?
-                            // * sender
-                            (<span className={`m-5 px-2 py-3 bg-white text-black ${poppins.className}`}>
-                                {Message.others}
-                            </span>)
-                            :
-                            // * me
-                            (<span className={`m-5 px-2 py-3 bg-[#317bfe] text-black ${poppins.className}`}>
-                                {Message.myText}
-                            </span>)
-                        }
+                        className={`flex ${msg.others ? "justify-start" : "justify-end"} mr-4`}
+                    >
+                        <span
+                            className={`m-2 px-3 py-2 rounded-xl ${msg.others
+                                ? "bg-white text-black"
+                                : "bg-[#317bfe] text-white"
+                                } ${poppins.className}`}
+                        >
+                            {msg.others || msg.myText}
+                        </span>
                     </div>
                 ))}
             </div>
-            {/* input msg */}
-            <div className="flex items-center w-[100%] py-3 px-2 bg-white absolute bottom-0">
+
+            {/* Input */}
+            <div className="flex items-center w-full py-3 px-2 bg-white absolute bottom-0">
                 <input
                     value={input}
                     onKeyDown={(e) => e.key === "Enter" && sendMessage()}
@@ -92,13 +114,15 @@ const MainChat = ({ userName }: { userName: string }) => {
                     className={`flex-1 px-4 py-2 outline-none ${poppins.className}`}
                     placeholder="Send a Message"
                 />
-                <button className='p-2 bg-[#317bfe] rounded-full ' onClick={sendMessage}>
-                    <Send className="cursor-pointer " color='white' size={20} />
+                <button
+                    className="p-2 bg-[#317bfe] rounded-full"
+                    onClick={sendMessage}
+                >
+                    <Send className="cursor-pointer" color="white" size={20} />
                 </button>
-
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default MainChat 
+export default MainChat;

@@ -6,9 +6,10 @@ import Modal from "../components/Modal";
 import ChatUserList from "../components/ChatUserList";
 import Doodles from "../components/Doodles";
 
-export default function chats() {
+export default function Chats() {
 
     const [userName, setUserName] = useState("")
+    const [receiver, setReceiver] = useState('')
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     return (
@@ -16,11 +17,11 @@ export default function chats() {
             <div className="flex h-[100vh]">
                 <ChatLists
                     setUserName={setUserName}
-                 
+
                     setIsModalOpen={setIsModalOpen} />
                 {
                     userName ?
-                        <MainChat userName={userName} />
+                        <MainChat userName={userName} receiver='shubham'/>
                         :
                         <Doodles />
                 }

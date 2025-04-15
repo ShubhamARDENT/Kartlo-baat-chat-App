@@ -4,8 +4,7 @@ import React, { useEffect, useState } from 'react'
 
 interface IUser {
     username: string;
-    id: number;
-    
+    id: number;    
 }
 
 const ChatUserList = ({ isModalOpen, setUserName }: {
@@ -23,8 +22,7 @@ const ChatUserList = ({ isModalOpen, setUserName }: {
     useEffect(() => {
        client.get('').then((response) => setDummyUserData(response.data))
     }, [])
-
-   
+    
 
     return (
         <div className='flex flex-col justify-between h-full'>
@@ -44,13 +42,11 @@ const ChatUserList = ({ isModalOpen, setUserName }: {
                                 className="scale-150 cursor-pointer"
                             />
                         )}
-
                         <img src="/images/profile.png"
                             alt="user-profile"
                             className='w-10 mx-2' />
                         <div className='flex flex-col'>
                             <span className='text-lg text-white'>{user.username}</span>
-                            <span className='text-white text-sm'>{user.status}</span>
                         </div>
                     </div>
                 ))}
