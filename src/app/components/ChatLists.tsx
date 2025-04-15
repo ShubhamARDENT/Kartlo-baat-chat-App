@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { Poppins } from 'next/font/google'
 import ChatUserList from './ChatUserList'
 import { Search, Ellipsis } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 
 const poppins = Poppins({
@@ -12,12 +13,13 @@ const poppins = Poppins({
     display: 'swap',
 })
 
-const ChatLists = ({ setUserName, setIsModalOpen, selectedUsers }: {
+const ChatLists = ({ setUserName, setIsModalOpen }: {
     setUserName: React.Dispatch<React.SetStateAction<string>>
-    
+
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>
 }) => {
 
+    const router = useRouter()
     const [isVisible, setVisible] = useState(false)
     const handleMenu = () => {
         setVisible(prev => !prev)
@@ -43,7 +45,7 @@ const ChatLists = ({ setUserName, setIsModalOpen, selectedUsers }: {
                     <p className='cursor-pointer hover:text-blue-600'>edit profile</p>
                     <p className='cursor-pointer hover:text-blue-600'
                         onClick={handleOpenModal}> create a group</p>
-                    <p className='cursor-pointer hover:text-blue-600'>log out</p>
+                    <p className='cursor-pointer hover:text-blue-600' onClick={() => router.push('/login')}>log out</p>
                 </div>
             </div>
             {/* serach chats */}

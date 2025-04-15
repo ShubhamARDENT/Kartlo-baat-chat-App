@@ -4,7 +4,7 @@ import Link from "next/link"
 import React from "react"
 import { useRouter } from "next/navigation"
 import { Poppins } from 'next/font/google';
-
+import axios from "axios"
 
 
 export default function SignUp() {
@@ -16,9 +16,11 @@ export default function SignUp() {
   })
 
   //* start page
-
   const router = useRouter()
 
+  const client = axios.create({
+    baseURL: 'http://127.0.0.1:8000/signup'
+  })
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target
@@ -26,14 +28,24 @@ export default function SignUp() {
       ...prev,
       [name]: value
     }))
-
   }
 
-  const handleSubmit = (e) => {
+  const handleSignInSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    try {
+      client.post('', {
+        username: user.username,
+        email: user.email,
+        password: user.password,
+      })
+      router.push('/profile')
+    } catch (error) {
+      console.log(error)
+    }
+
   }
   return (
-    <div className="min-h-screen flex justify-evenly items-center bg-no-repeat"
+    <div className="min-h-screen flex justify-evenly items-center "
       style={{ backgroundImage: "url('/images/background.png')" }}
     >
       {/* <img src="/images/chatapp-logo.png" alt="" style={{ width: "20%", height: "30%" }} />
@@ -43,7 +55,7 @@ export default function SignUp() {
 
       {/* form section */}
       <div className="bg-white p-8 rounded-xl">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <form onSubmit={handleSignInSubmit} className="flex flex-col gap-5">
           <label className="font-semibold text-2xl">Sign Up</label>
           <input type="text" placeholder="username"
             name="username"
@@ -62,8 +74,8 @@ export default function SignUp() {
             onChange={handleChange}
             className="p-2 border-1 border-gray-400 border-solid rounded-md" />
 
-          <button type="button"
-            onClick={() => router.push("/profile")}
+          <button type="submit"
+            disabled={!user.email || !user.password || !user.username }
             className="bg-[#077eff] rounded-md text-white cursor-pointer p-2 text-xl">
             Create account
           </button>

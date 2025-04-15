@@ -55,7 +55,7 @@ const MainChat = ({ userName }: { userName: string }) => {
             <div className='flex items-center justify-between  px-5 py-2 border-b-1 border-gray-400 border-solid'>
                 <div className='flex items-center gap-5'>
                     <img src="/images/profile.png" alt="profile-photo" className='w-12' />
-                    <span className={`text-xl ${poppins.className}`}>{userName || "Richard Stanford"}</span>
+                    <span className={`text-xl ${poppins.className}`}>{userName}</span>
                     <span className=" h-4 w-4 bg-green-500 border-2 border-white rounded-full" />
                 </div>
                 <div>

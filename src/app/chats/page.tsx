@@ -4,29 +4,34 @@ import ChatLists from "../components/ChatLists";
 import MainChat from "../components/MainChat";
 import Modal from "../components/Modal";
 import ChatUserList from "../components/ChatUserList";
+import Doodles from "../components/Doodles";
 
 export default function chats() {
 
     const [userName, setUserName] = useState("")
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedUsers, setSelectedUsers] = useState<number[]>([])
 
     return (
         <>
-            <div className="flex h-full">
+            <div className="flex h-[100vh]">
                 <ChatLists
                     setUserName={setUserName}
-                    selectedUsers={selectedUsers}
+                 
                     setIsModalOpen={setIsModalOpen} />
-                <MainChat userName={userName} />
+                {
+                    userName ?
+                        <MainChat userName={userName} />
+                        :
+                        <Doodles />
+                }
             </div>
             <Modal isOpen={isModalOpen}
                 setIsModalOpen={setIsModalOpen}>
+                {/* indivdual user chats */}
                 <ChatUserList
                     isModalOpen={isModalOpen}
                     setUserName={setUserName}
-                    selectedUsers={selectedUsers}
-                    setSelectedUsers={setSelectedUsers} />
+                />
             </Modal >
         </>
 

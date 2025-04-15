@@ -35,8 +35,10 @@ const Modal = ({ isOpen, setIsModalOpen, children }: ModalProps) => {
                 <div className="flex justify-between mb-5">
                     <input type="text"
                         placeholder="create group name"
-                        className={`bg-white p-4 outline-none text-black text-sm w-[80%] ${poppins.className}`} />
-
+                        className={`bg-white p-4 outline-none text-black text-sm w-[90%] ${poppins.className}`} />
+                    <button className="bg-white p-5 cursor-pointer hover:bg-blue-500">
+                        <Plus />
+                    </button>
                 </div>
                 {children}
             </div>
