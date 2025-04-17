@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Info, Send } from "lucide-react";
 import { Poppins } from "next/font/google";
+import { useSelector } from "react-redux";
 
 const poppins = Poppins({
     subsets: ["latin"],
@@ -13,46 +14,57 @@ interface IMessages {
     others?: string;
 }
 
+interface user {
+    email: string
+    id: number
+    isActive: boolean
+    password: string
+    username: string
+}
+
 interface Props {
-    userName: string;
+    // userName: user[];
     room?: string; // for public room
     receiver?: string; // for private chat
     mode?: "room" | "private";
 }
 
-const MainChat = ({ userName, receiver, }: Props) => {
+const MainChat = ({ receiver }: Props) => {
     const [input, setInput] = useState("");
+
     const [messages, setMessages] = useState<IMessages[]>([]);
     const messageEndRef = useRef<HTMLDivElement | null>(null);
     const socketRef = useRef<WebSocket | null>(null);
 
-    useEffect(() => {
-        const socket = new WebSocket(`ws://localhost:8000/ws/private/${userName}/${receiver}`);
+    const username = useSelector((state) => state.user.username);
+    const [LoggedInUser, setLoggedInUser] = useState("");
 
-        socket.onopen = () => {
-            console.log("Connected to private chat");
-        };
+
+
+    useEffect(() => {
+
+        //* set the logged in user via redux store
+
+        const socket = new WebSocket(`ws://localhost:8000/ws/private/${LoggedInUser}/${receiver}`);
 
         socket.onmessage = (event) => {
-            setMessages((prev) => [...prev, { others: event.data }]);
+            try {
+                const data = JSON.parse(event.data);
+                if (data.sender === LoggedInUser) {
+                    setMessages((prev) => [...prev, { myText: data.message }]);
+                } else {
+                    setMessages((prev) => [...prev, { others: data.message }]);
+                }
+            } catch (e) {
+                console.error("Failed to parse message:", e);
+            }
         };
-
 
         socket.onerror = (err) => {
             console.error("WebSocket error:", err);
         };
-        socket.onclose = (event) => {
-            console.warn("WebSocket closed", {
-                code: event.code,
-                reason: event.reason,
-                wasClean: event.wasClean,
-            });
-        };
-        socket.onerror = (event) => {
-            console.error("WebSocket error:", event);
-            console.log("WebSocket readyState:", socket.readyState);
-            console.log("WebSocket URL:", socket.url);
-        };
+
+
         socketRef.current = socket;
 
         return () => {
@@ -66,11 +78,10 @@ const MainChat = ({ userName, receiver, }: Props) => {
         if (socket?.readyState === WebSocket.OPEN) {
             socket.send(input);
         }
-
-        setMessages((prev) => [...prev, { myText: input }]);
-        setInput("");
+        setInput("")
     };
 
+    console.log(messages, "mess")
     useEffect(() => {
         messageEndRef.current?.scrollIntoView({
             behavior: "smooth",

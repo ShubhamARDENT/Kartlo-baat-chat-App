@@ -13,7 +13,7 @@ const poppins = Poppins({
     display: 'swap',
 })
 
-const ChatLists = ({ setIsModalOpen, setReceiver }: {
+const ChatLists = ({ setIsModalOpen, setReceiver}: {
     setReceiver: React.Dispatch<React.SetStateAction<string>>
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>
 }) => {
@@ -28,13 +28,14 @@ const ChatLists = ({ setIsModalOpen, setReceiver }: {
     const handleOpenModal = () => {
         setIsModalOpen(true)
     }
+    
 
     return (
         <div className='bg-[#001030] w-[25%] '>
             <div className='flex justify-between items-center p-5'>
                 <div className='flex items-center' >
                     <img src="/images/logochat.png" className='w-15' alt="app-logo" />
-                    <span className={`text-white text-xl ml-10 ${poppins.className}`}>Chat App</span>
+                    <span className={`text-white text-xl ml-10 ${poppins.className}`}>loggedInUser</span>
                 </div>
                 <div>
                     <Ellipsis className='text-white relative cursor-pointer' onClick={handleMenu} />

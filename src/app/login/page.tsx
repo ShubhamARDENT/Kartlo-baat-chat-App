@@ -4,12 +4,16 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useState } from "react";
 import { tree } from "next/dist/build/templates/app-page";
+import { useDispatch } from 'react-redux';
+import { setUsername } from '../../store/slices';
+
 
 export default function LoginPage() {
     const [userLogin, setUserLogin] = useState({
         email: "",
         password: "",
     });
+    const dispatch = useDispatch()
     const [error, setError] = useState<string | null>(null);  // For error handling
     const router = useRouter();
 
@@ -25,7 +29,11 @@ export default function LoginPage() {
                 email: userLogin.email,
                 password: userLogin.password,
             });
-
+            
+            //* storing username in global store
+            const { username } = response.data
+            dispatch(setUsername(username))
+            
             // Redirect to chats page
             router.push('/chats');
         } catch (error: any) {
