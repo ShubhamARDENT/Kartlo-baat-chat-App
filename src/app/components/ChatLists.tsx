@@ -4,6 +4,7 @@ import { Poppins } from 'next/font/google'
 import ChatUserList from './ChatUserList'
 import { Search, Ellipsis } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useSelector } from 'react-redux'
 
 
 const poppins = Poppins({
@@ -13,8 +14,9 @@ const poppins = Poppins({
     display: 'swap',
 })
 
-const ChatLists = ({ setIsModalOpen, setReceiver}: {
-    setReceiver: React.Dispatch<React.SetStateAction<string>>
+const ChatLists = ({ setIsModalOpen, setReceiver ,conversationId }: {
+    setReceiver: React.Dispatch<React.SetStateAction<number>>
+     conversationId:{}
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>
 }) => {
 
@@ -28,14 +30,14 @@ const ChatLists = ({ setIsModalOpen, setReceiver}: {
     const handleOpenModal = () => {
         setIsModalOpen(true)
     }
-    
+
 
     return (
         <div className='bg-[#001030] w-[25%] '>
             <div className='flex justify-between items-center p-5'>
                 <div className='flex items-center' >
                     <img src="/images/logochat.png" className='w-15' alt="app-logo" />
-                    <span className={`text-white text-xl ml-10 ${poppins.className}`}>loggedInUser</span>
+                    <span className={`text-white text-xl ml-10 ${poppins.className}`}>LoggedInUser</span>
                 </div>
                 <div>
                     <Ellipsis className='text-white relative cursor-pointer' onClick={handleMenu} />
@@ -56,7 +58,7 @@ const ChatLists = ({ setIsModalOpen, setReceiver}: {
             </div>
             {/* user list */}
             <div className='mt-10 flex flex-col gap-y-5 '>
-                <ChatUserList setReceiver={setReceiver} />
+                <ChatUserList setReceiver={setReceiver} conversationId={conversationId} />
             </div>
 
 

@@ -3,25 +3,31 @@ import { createSlice , PayloadAction} from "@reduxjs/toolkit";
 
 
 interface userState {
-    username:string | null
+    senderId: number | null
+    userMsg:[]
 }
 
 const initialState : userState={
-    username:null
+    senderId:null,
+    userMessage:[]
 }
 
 const userSlice = createSlice({
     name:"loggedInUser",
       initialState,
       reducers: {
-        setUsername: (state, action: PayloadAction<string>) => {
-          state.username = action.payload;
+        setSenderId: (state, action: PayloadAction<number>) => {
+          state.senderId = action.payload;
         },
-        clearUsername: (state) => {
-          state.username = null;
+        clearSenderId: (state) => {
+          state.senderId = null;
         },
+        setUserMessage:(state,action)=>{
+          state.userMsg = action.payload
+        }
       },
 })
 
-export const { setUsername, clearUsername } = userSlice.actions;
+
+export const { setSenderId , clearSenderId ,setUserMessage } = userSlice.actions;
 export default userSlice.reducer;

@@ -5,7 +5,7 @@ import axios from "axios";
 import { useState } from "react";
 import { tree } from "next/dist/build/templates/app-page";
 import { useDispatch } from 'react-redux';
-import { setUsername } from '../../store/slices';
+import { setSenderId } from '../../store/slices';
 
 
 export default function LoginPage() {
@@ -19,6 +19,7 @@ export default function LoginPage() {
 
     const client = axios.create({
         baseURL: 'http://127.0.0.1:8000/login',
+        
     });
 
     const handleLogInSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -29,11 +30,11 @@ export default function LoginPage() {
                 email: userLogin.email,
                 password: userLogin.password,
             });
-            
+
             //* storing username in global store
-            const { username } = response.data
-            dispatch(setUsername(username))
-            
+            const { id } = response.data
+            dispatch(setSenderId(id))
+            console.log(response.data)
             // Redirect to chats page
             router.push('/chats');
         } catch (error: any) {

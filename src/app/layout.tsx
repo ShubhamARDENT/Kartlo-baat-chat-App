@@ -3,9 +3,9 @@
 import { Geist, Geist_Mono, Poppins } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
-import { store } from '../store/store';
+import { store, persistor } from '../store/store';
 import { Provider } from 'react-redux';
-
+import { PersistGate } from 'redux-persist/integration/react';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,7 +34,9 @@ export default function RootLayout({
         className={`antialiased`}
       >
         <Provider store={store}>
-          <AuthProvider>{children}</AuthProvider>
+          <PersistGate loading={null} persistor={persistor} >
+            <AuthProvider>{children}</AuthProvider>
+          </PersistGate>
         </Provider>
       </body>
     </html>
