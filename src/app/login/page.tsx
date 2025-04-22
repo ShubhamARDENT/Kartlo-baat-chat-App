@@ -19,7 +19,7 @@ export default function LoginPage() {
 
     const client = axios.create({
         baseURL: 'http://127.0.0.1:8000/login',
-        
+
     });
 
     const handleLogInSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -30,7 +30,7 @@ export default function LoginPage() {
                 email: userLogin.email,
                 password: userLogin.password,
             });
-
+            console.log(response, "ressponse")
             //* storing username in global store
             const { id } = response.data
             dispatch(setSenderId(id))

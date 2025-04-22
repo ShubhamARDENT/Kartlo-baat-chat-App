@@ -23,32 +23,21 @@ export interface IMessages {
 
 interface Props {
     receiver?: number; // for private chat 
-    conversationId: { id: number }[]
 }
 
-const MainChat = ({ receiver, conversationId }: Props) => {
+const MainChat = ({ receiver, }: Props) => {
 
-    const socketRef = useRef<WebSocket | null>(null);
-    const [LoggedInUser, setLoggedInUser] = useState<number>(0);
-    //* create unique name
-    const Name = `${Math.max(receiver, LoggedInUser)}_${Date.now()})}`
-    const senderId = useSelector((state) => state?.user?.senderId);
+    const Fast_API = process.env.NEXT_PUBLIC_Fast_API
+    const { senderId, userConvoId } = useSelector((state) => state?.user);
     const [input, setInput] = useState("");
-    const convoId = conversationId[0]?.id
-    const dispatch = useDispatch()
     const [messages, setMessages] = useState<IMessages[]>([{
         content: "",
         sender_id: 0,
         conversation_id: 0,
         groupchat_id: 0
     }])
+    const dispatch = useDispatch()
 
-
-
-    //* receverd comes from listing
-    useEffect(() => {
-        setLoggedInUser(senderId)
-    }, [])
 
     const sendMessage = async () => {
 
@@ -57,62 +46,48 @@ const MainChat = ({ receiver, conversationId }: Props) => {
         const newMessage = {
             content: input,
             sender_id: senderId,
-            conversation_id: convoId,
+            conversation_id: userConvoId,
             groupchat_id: null,
         }
-
         setMessages((prev) => [...prev, newMessage])
 
-        //* sending convo
-        if (!convoId && senderId && receiver) {
-            try {
-                const res = await axios.post("http://127.0.0.1:8000/conversations", {
-                    name: Name,
-                    user1_id: senderId,
-                    user2_id: receiver,
-                });
-
-                console.log("Conversation created:", res.data);
-            } catch (error) {
-                console.error("Error creating conversation:", error);
-            }
-        }
 
         //* sending msg to backend
         try {
-            const ss = await axios.post("http://127.0.0.1:8000/messages", newMessage)
-            if (ss.statusText === "OK") {
-                const messages = await axios.get(`http://127.0.0.1:8000/messages/conversation/${convoId}`)
-                console.log(messages, "yy")
-                dispatch(setUserMessage(messages.data))
+            const postMsg = await axios.post("http://127.0.0.1:8000/messages", newMessage)
+            //* getting latest msg
+            if (postMsg.statusText === "OK") {
+                const mess = await axios.get(`http://127.0.0.1:8000/messages/conversation/${userConvoId}`)
+                //* sending this msg to redux
+                dispatch(setUserMessage(mess.data))
             }
         } catch (error) {
-            console.error("Error sending conversation:", error);
+            console.error("Error getting conversation:", error);
         }
-
         setInput("")
     };
+    //* getting the rece name
+    console.log(receiver, "rec")
 
 
-
+    //* send login name from lofin api and send
     return (
         <div className="bg-gray-200 h-screen w-full relative flex flex-col overflow-auto hide-scrollbar">
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-2 border-b border-gray-400">
                 <div className="flex items-center gap-5">
                     <img src="/images/profile.png" alt="profile" className="w-12" />
-                    <span className={`text-xl ${poppins.className}`}>{receiver}</span>
+                    {/* <span className={`text-xl ${poppins.className}`}>{receiver}</span> */}
                     <span className="h-4 w-4 bg-green-500 border-2 border-white rounded-full" />
                 </div>
                 <Info className="cursor-pointer" />
             </div>
-            <div className="flex-1 overflow-y-auto space-y-2 px-4 py-2 custom-scroll flex-col mb-12">
+            <div className="flex-1 overflow-y-auto space-y-2 px-4 py-3 custom-scroll flex-col mb-15">
                 {/* Chat Messages */}
                 <UserMessages
                     senderId={senderId}
                     messages={messages}
                     receiver={receiver}
-                    conversationId={conversationId}
                 />
                 {/* Input */}
                 <div className="flex items-center w-full py-3 px-2 bg-white absolute bottom-0 left-0">

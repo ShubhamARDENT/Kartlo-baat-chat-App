@@ -3,13 +3,15 @@ import { createSlice , PayloadAction} from "@reduxjs/toolkit";
 
 
 interface userState {
-    senderId: number | null
-    userMsg:[]
+    senderId: number | null,
+    userMsg:[],
+    userConvoId:number | string
 }
 
-const initialState : userState={
+const initialState : userState ={
     senderId:null,
-    userMessage:[]
+    userMsg: [], 
+    userConvoId: 0   
 }
 
 const userSlice = createSlice({
@@ -24,10 +26,13 @@ const userSlice = createSlice({
         },
         setUserMessage:(state,action)=>{
           state.userMsg = action.payload
+        },
+        setUserConvoId:(state,action)=>{
+          state.userConvoId = action.payload
         }
       },
 })
 
 
-export const { setSenderId , clearSenderId ,setUserMessage } = userSlice.actions;
+export const { setSenderId , clearSenderId ,setUserMessage ,setUserConvoId } = userSlice.actions;
 export default userSlice.reducer;
