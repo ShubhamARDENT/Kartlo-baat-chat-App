@@ -9,7 +9,7 @@ const persistConfig = {
   key: 'root',
   storage,
 };
-
+export type RootState = ReturnType<typeof store.getState>;
 const rootReducer = combineReducers({
   user: userReducer,
 });

@@ -25,9 +25,7 @@ export default function Chats() {
                 />
                 {
                     receiver ?
-                        <MainChat
-                            receiver={receiver}
-                            />
+                        <MainChat receiver={receiver}/>
                         :
                         <Doodles />
                 }

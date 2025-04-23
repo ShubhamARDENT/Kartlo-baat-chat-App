@@ -5,7 +5,7 @@ import axios from "axios";
 import { useState } from "react";
 import { tree } from "next/dist/build/templates/app-page";
 import { useDispatch } from 'react-redux';
-import { setSenderId } from '../../store/slices';
+import { setSenderId, setSenderName } from '../../store/slices';
 
 
 export default function LoginPage() {
@@ -13,13 +13,13 @@ export default function LoginPage() {
         email: "",
         password: "",
     });
+    const [agree, setAgree] = useState(false)
     const dispatch = useDispatch()
     const [error, setError] = useState<string | null>(null);  // For error handling
     const router = useRouter();
 
     const client = axios.create({
         baseURL: 'http://127.0.0.1:8000/login',
-
     });
 
     const handleLogInSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -30,11 +30,15 @@ export default function LoginPage() {
                 email: userLogin.email,
                 password: userLogin.password,
             });
-            console.log(response, "ressponse")
+
+
             //* storing username in global store
-            const { id } = response.data
+            const { id, username } = response.data
+
             dispatch(setSenderId(id))
-            console.log(response.data)
+
+            dispatch(setSenderName(username))
+
             // Redirect to chats page
             router.push('/chats');
         } catch (error: any) {
@@ -86,14 +90,14 @@ export default function LoginPage() {
 
                     <button
                         type="submit"
-                        disabled={!userLogin.email || !userLogin.password}
+                        disabled={!userLogin.email || !userLogin.password || !agree}
                         className="bg-[#077eff] rounded-md text-white cursor-pointer p-2 text-xl"
                     >
                         Login
                     </button>
 
                     <div className="flex gap-2 text-gray-500 text-sm">
-                        <input type="checkbox" />
+                        <input type="checkbox" checked={agree} onChange={() => setAgree(!agree)} />
                         <p>Agree to the terms of use & privacy policy.</p>
                     </div>
 

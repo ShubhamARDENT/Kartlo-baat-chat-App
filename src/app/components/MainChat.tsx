@@ -17,78 +17,71 @@ export interface IMessages {
     sender_id: number,
     conversation_id: number,
     groupchat_id: number | null
-    // length: number
+
 }[]
 
 
 interface Props {
-    receiver?: number; // for private chat 
+    receiver?: {
+        username: string
+    }
 }
 
 const MainChat = ({ receiver, }: Props) => {
-
-    const Fast_API = process.env.NEXT_PUBLIC_Fast_API
-    const { senderId, userConvoId } = useSelector((state) => state?.user);
     const [input, setInput] = useState("");
-    const [messages, setMessages] = useState<IMessages[]>([{
-        content: "",
-        sender_id: 0,
-        conversation_id: 0,
-        groupchat_id: 0
-    }])
-    const dispatch = useDispatch()
+
+    const socketRef = useRef<WebSocket | null>(null);
+    const [messages, setMessages] = useState<string[]>([]);
+    const userConversation = useSelector((state) => state.user.userConversation)
+
+    const receiverid = receiver?.id
 
 
-    const sendMessage = async () => {
+    const senderid = useSelector((state) => state.user.senderId)
 
-        if (!input.trim()) return;
+   
+    useEffect(() => {
+        const socket = new WebSocket(`ws://localhost:8000/ws/private/${senderid}/${receiverid}`);
+        socketRef.current = socket;
 
-        const newMessage = {
-            content: input,
-            sender_id: senderId,
-            conversation_id: userConvoId,
-            groupchat_id: null,
+        socket.onclose = () => {
+            console.log("WebSocket closed");
+        };
+
+        socket.onerror = (err) => {
+            console.error("WebSocket error:", err);
+        };
+        socket.onmessage = (event) => {
+            const message = JSON.parse(event.data);
+            setMessages((prev) => [...prev, message])
+
+        };
+
+        return () => {
+            socket.close();
+        };
+    }, [receiverid]);
+
+    const sendMessage = () => {
+        if (socketRef.current && input) {
+            socketRef.current.send(input);
+            setInput('');
         }
-        setMessages((prev) => [...prev, newMessage])
-
-
-        //* sending msg to backend
-        try {
-            const postMsg = await axios.post("http://127.0.0.1:8000/messages", newMessage)
-            //* getting latest msg
-            if (postMsg.statusText === "OK") {
-                const mess = await axios.get(`http://127.0.0.1:8000/messages/conversation/${userConvoId}`)
-                //* sending this msg to redux
-                dispatch(setUserMessage(mess.data))
-            }
-        } catch (error) {
-            console.error("Error getting conversation:", error);
-        }
-        setInput("")
     };
-    //* getting the rece name
-    console.log(receiver, "rec")
-
-
-    //* send login name from lofin api and send
     return (
         <div className="bg-gray-200 h-screen w-full relative flex flex-col overflow-auto hide-scrollbar">
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-2 border-b border-gray-400">
                 <div className="flex items-center gap-5">
                     <img src="/images/profile.png" alt="profile" className="w-12" />
-                    {/* <span className={`text-xl ${poppins.className}`}>{receiver}</span> */}
+                    <span className={`text-xl ${poppins.className}`}>{receiver?.username}</span>
                     <span className="h-4 w-4 bg-green-500 border-2 border-white rounded-full" />
                 </div>
                 <Info className="cursor-pointer" />
             </div>
             <div className="flex-1 overflow-y-auto space-y-2 px-4 py-3 custom-scroll flex-col mb-15">
                 {/* Chat Messages */}
-                <UserMessages
-                    senderId={senderId}
-                    messages={messages}
-                    receiver={receiver}
-                />
+                <UserMessages messages={messages} selectedUserId={receiverid} />
                 {/* Input */}
                 <div className="flex items-center w-full py-3 px-2 bg-white absolute bottom-0 left-0">
                     <input

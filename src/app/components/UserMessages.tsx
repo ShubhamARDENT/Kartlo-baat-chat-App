@@ -14,63 +14,60 @@ const poppins = Poppins({
 
 
 
-const UserMessages = ({ messages }:
+const UserMessages = ({ messages, selectedUserId }:
     {
-        receiver: number
+        selectedUserId: number,
+        messages: []
     }) => {
 
-    const { userMsg, senderId } = useSelector((state) => state.user)
+    const { senderId } = useSelector((state) => state.user)
+   
 
     const messageEndRef = useRef<HTMLDivElement | null>(null);
 
-
     useEffect(() => {
-      
         messageEndRef.current?.scrollIntoView({
             behavior: "smooth",
             block: "end",
             inline: "nearest",
         });
-    }, [userMsg]);
+    }, [messages]);
 
+    const filteredMessages = messages.filter(
+        (msg) =>
+            (String(msg.sender) === String(senderId) &&
+                String(msg.receiver) === String(selectedUserId)) ||
+            (String(msg.sender) === String(selectedUserId) &&
+                String(msg.receiver) === String(senderId))
+    );
+
+
+
+   
 
 
     return (
         <>
             {
-                userMsg?.map((msg, index) => {
-
-                    const date = new Date(msg.timestamp)
-                    const options: Intl.DateTimeFormatOptions = {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                    };
-                    const timeString = date.toLocaleTimeString([], options);
-
-
+                filteredMessages?.map((msg, index) => {
                     return (
                         <div
-                            ref={index === userMsg.length - 1 ? messageEndRef : null}
-                            key={msg.id}
-                            className={`flex ${msg.sender_id === senderId ? "justify-end" : "justify-start"} mr-4`}
+                            ref={index === messages.length - 1 ? messageEndRef : null}
+                            key={msg.receiver}
+                            className={`flex ${msg.sender === senderId ? "justify-end" : "justify-start"} mr-4`}
                         >
                             <span
-                                className={`m-2 px-3 py-2 rounded-xl mb-3 ${msg.sender_id === senderId
-                                    ? "bg-[#317bfe] text-white"
-                                    : "bg-white text-black"
-                                    } ${poppins.className}`}
+                                className={`m-2 px-3 py-2 rounded-xl mb-3 ${msg.sender === senderId ? "bg-blue-500 text-white" :
+                                    "bg-white text-black"}
+                                     ${poppins.className}`}
                             >
-                                <div className="text-sm font-semibold">{msg.sender_username}</div>
-                                <div>{msg.content}</div>
-                                <div className="text-xs text-white mt-1">
-                                    {timeString}
-                                </div>
+                                {/* <div className="text-sm font-semibold">{msg.sender_username}</div> */}
+                                <div>{msg.message}</div>
+
                             </span>
                         </div>
                     )
                 }
-
-
                 )
             }
 

@@ -1,13 +1,20 @@
 // 
 "use client"
-import { setUserConvoId, setUserMessage } from '@/store/slices';
+import { setUserConversation, setUserMessage } from '@/store/slices';
 import axios from 'axios';
-import React, { useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useEffect, useRef, useState } from 'react'
+import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
+import { RootState } from '@/store/store';
 
 interface IUser {
     username: string;
     id: number;
+}
+
+
+interface IConversation {
+    user1_id: number,
+    user2_id: number
 }
 
 const ChatUserList = ({
@@ -22,13 +29,11 @@ const ChatUserList = ({
 
     const Fast_API = process.env.NEXT_PUBLIC_Fast_API
     const dispatch = useDispatch()
-
-    const senderID = useSelector((state) => state?.user?.senderId)
-
+    const useTypedSelector: TypedUseSelectorHook<RootState> = useSelector;
+    const senderID = useTypedSelector((state) => state.user.senderId);
     const [users, setUsers] = useState<IUser[]>([])
     const [convoList, setConvoList] = useState<any[]>([])
-   
-
+    
     useEffect(() => {
         axios.get(`${Fast_API}/conversations/${senderID}`).then((res) => {
             setConvoList(res.data)
@@ -39,18 +44,15 @@ const ChatUserList = ({
     }, [])
 
     const getConvoId = async (id: number) => {
-        const res = await axios.get(`${Fast_API}/conversations/${id}`)
-        const conversation = res.data.find((convo: any) =>
-            (convo.user1_id === senderID && convo.user2_id === id) ||
-            (convo.user2_id === senderID && convo.user1_id === id)
-        );
-     
-        dispatch(setUserConvoId(conversation.id))
-        const result = await axios.get(`${Fast_API}/messages/conversation/${conversation.id}`)
-        dispatch(setUserMessage(result.data))
-
+        if (id) {
+            const res = await axios.get(`${Fast_API}/conversations/${id}`)
+            const conversation = res.data.find((convo: any) =>
+                (convo.user1_id === senderID && convo.user2_id === id) ||
+                (convo.user2_id === senderID && convo.user1_id === id)
+            );
+            dispatch(setUserConversation(conversation))
+        }
     }
-
 
     // Choose which list to show: search result or convo list
     const renderList = UserData?.length > 0 ? UserData : convoList
