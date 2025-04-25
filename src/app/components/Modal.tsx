@@ -55,11 +55,16 @@ const Modal = ({ isOpen, setIsModalOpen, children, groupMembers, setGroupMembers
         console.log("called")
         const memberIds = groupMembers.map(member => member.id);
         console.log(memberIds, "id")
-        const res = await axios.post(`${Fast_API}/groups/create`, {
-            group_name: groupName,
-            members_id: memberIds
-        });
-        console.log(res, "res")
+        try {
+            const res = await axios.post(`${Fast_API}/groups/create`, {
+                group_name: groupName,
+                member_ids: memberIds
+            });
+            console.log(res, "res")
+        } catch (error) {
+            console.log(error, "error creating grp")
+        }
+
     }
     return (
         // modal bg
