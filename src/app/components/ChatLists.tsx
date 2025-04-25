@@ -6,7 +6,7 @@ import { Search, Ellipsis, AwardIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useSelector } from 'react-redux'
 import axios from "axios"
-import { error } from 'console'
+import { IReceiver, IUser } from '../chats/page'
 
 const poppins = Poppins({
     subsets: ['latin'],
@@ -15,17 +15,15 @@ const poppins = Poppins({
     display: 'swap',
 })
 
-interface IUser {
-    username: string;
-    id: number;
-}
 
-const ChatLists = ({ setIsModalOpen, setReceiver, }: {
-    setReceiver: React.Dispatch<React.SetStateAction<number>>
+const ChatLists = ({ setIsModalOpen, setReceiver, setUserData, UserData }: {
+    setReceiver: React.Dispatch<React.SetStateAction<IReceiver | undefined>>
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>
+    setUserData: React.Dispatch<React.SetStateAction<IUser[]>>
+    UserData:IUser[]
 }) => {
     const FastApi = process.env.NEXT_PUBLIC_Fast_API
-    const [UserData, setUserData] = useState<IUser[]>([])
+
     const [userName, setUserName] = useState("")
     const router = useRouter()
     const [isVisible, setVisible] = useState(false)
@@ -76,7 +74,7 @@ const ChatLists = ({ setIsModalOpen, setReceiver, }: {
         }, 500);
 
         return () => {
-             isMounted = false;
+            isMounted = false;
             clearTimeout(debouncedQuery);
         };
     }, [userName]);

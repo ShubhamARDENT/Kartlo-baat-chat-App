@@ -5,7 +5,7 @@ import { Poppins } from "next/font/google";
 import { useDispatch, useSelector } from "react-redux";
 import UserMessages from "./UserMessages";
 import axios from "axios";
-import { setUserMessage } from "@/store/slices";
+import { IReceiver } from "../chats/page";
 
 const poppins = Poppins({
     subsets: ["latin"],
@@ -13,54 +13,126 @@ const poppins = Poppins({
 });
 
 export interface IMessages {
-    content: string,
-    sender_id: number,
-    conversation_id: number,
-    groupchat_id: number | null
-
+    message: string,
+    mode: string,
+    receiver: number,
+    sender: number
 }[]
 
 
-interface Props {
-    receiver?: {
-        username: string
-    }
-}
-
-const MainChat = ({ receiver, }: Props) => {
+const MainChat = ({ receiver , groupMembers }: { receiver: IReceiver }) => {
     const [input, setInput] = useState("");
-
     const socketRef = useRef<WebSocket | null>(null);
-    const [messages, setMessages] = useState<string[]>([]);
-    const userConversation = useSelector((state) => state.user.userConversation)
+
+    const [messages, setMessages] = useState<IMessages[]>([]);
 
     const receiverid = receiver?.id
 
-
     const senderid = useSelector((state) => state.user.senderId)
 
-   
+    //* previous websocket connection
+    // useEffect(() => {
+    //     let socketURL;
+
+    //     if (!senderid || !receiverid) {
+    //         console.log("Missing required IDs for WebSocket connection");
+    //         return;
+    //     }
+    //     socketURL = `ws://localhost:8000/ws/private/${senderid}/${receiverid}`
+
+    //     // if (groupChat) {
+    //     //     socketURL = `ws://localhost:8000/ws/${groupChat}/${groupName}`
+    //     // } else {
+    //     // }
+    //     const socket = new WebSocket(socketURL);
+    //     socketRef.current = socket;
+
+    //     let reconnectTimer: NodeJS.Timeout;
+    //     socket.onopen = () => {
+    //         console.log(" --- websocket open --- ")
+    //     }
+    //     socket.onclose = (e) => {
+    //         console.log("--- WebSocket closed ---", e.code, e.reason);
+
+    //     }
+
+    //     socket.onerror = (err) => {
+    //         console.error("WebSocket error:", err);
+    //     };
+    //     socket.onmessage = (event) => {
+    //         const message = JSON.parse(event.data);
+    //         setMessages((prev) => [...prev, message])
+
+    //     };
+
+    //     return () => {
+    //         socket.close();
+    //     };
+    // }, [receiverid, senderid, groupChat]);
+
+
     useEffect(() => {
-        const socket = new WebSocket(`ws://localhost:8000/ws/private/${senderid}/${receiverid}`);
-        socketRef.current = socket;
+        // Only proceed if we have the necessary IDs
+        if (!senderid || (!receiverid)) {
+            console.log("Missing required IDs for WebSocket connection");
+            return;
+        }
 
-        socket.onclose = () => {
-            console.log("WebSocket closed");
-        };
+        // Determine the WebSocket URL
+        // const socketURL = groupChat
+        //     ? `ws://localhost:8000/ws/group/${groupChat}`
+        //     : `ws://localhost:8000/ws/private/${senderid}/${receiverid}`;
+        const socketURL = `ws://localhost:8000/ws/private/${senderid}/${receiverid}`;
 
-        socket.onerror = (err) => {
-            console.error("WebSocket error:", err);
-        };
-        socket.onmessage = (event) => {
-            const message = JSON.parse(event.data);
-            setMessages((prev) => [...prev, message])
+        // Create the WebSocket connection
+        try {
+            const socket = new WebSocket(socketURL);
+            socketRef.current = socket;
 
-        };
+            // Connection opened
+            socket.onopen = function (event) {
+                console.log("WebSocket connection established successfully");
+            };
 
-        return () => {
-            socket.close();
-        };
-    }, [receiverid]);
+            // Listen for messages
+            socket.onmessage = function (event) {
+                try {
+                    console.log("Message received:", event.data);
+                    const message = JSON.parse(event.data);
+                    console.log(message, "mess")
+                    setMessages(prev => [...prev, message]);
+                } catch (e) {
+                    console.error("Error parsing message:", e);
+                }
+            };
+
+            // Connection closed
+            socket.onclose = function (event) {
+                const reason = event.reason ? ` Reason: ${event.reason}` : '';
+                console.log(`WebSocket closed with code: ${event.code}.${reason}`);
+            };
+
+            // Connection error - capture more detailed error info
+            socket.onerror = function (event) {
+                console.log("WebSocket error event:", JSON.stringify(event, Object.getOwnPropertyNames(event)));
+                console.log("WebSocket readyState:", socket.readyState);
+
+                // Check if there are network issues
+                if (!navigator.onLine) {
+                    console.error("Network appears to be offline");
+                }
+            };
+
+            // Cleanup function
+            return () => {
+                if (socket && socket.readyState < 2) { // 0=CONNECTING, 1=OPEN
+                    socket.close();
+                }
+            };
+        } catch (err) {
+            console.error("Error creating WebSocket:", err);
+        }
+    }, [senderid, receiverid]);
 
     const sendMessage = () => {
         if (socketRef.current && input) {
@@ -68,21 +140,23 @@ const MainChat = ({ receiver, }: Props) => {
             setInput('');
         }
     };
+   
     return (
         <div className="bg-gray-200 h-screen w-full relative flex flex-col overflow-auto hide-scrollbar">
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-2 border-b border-gray-400">
                 <div className="flex items-center gap-5">
                     <img src="/images/profile.png" alt="profile" className="w-12" />
-                    <span className={`text-xl ${poppins.className}`}>{receiver?.username}</span>
+                    <span className={`text-xl ${poppins.className}`}>{receiver.username}</span>
                     <span className="h-4 w-4 bg-green-500 border-2 border-white rounded-full" />
                 </div>
                 <Info className="cursor-pointer" />
             </div>
             <div className="flex-1 overflow-y-auto space-y-2 px-4 py-3 custom-scroll flex-col mb-15">
                 {/* Chat Messages */}
-                <UserMessages messages={messages} selectedUserId={receiverid} />
+                <UserMessages messages={messages || []} selectedUserId={receiverid} />
                 {/* Input */}
+                
                 <div className="flex items-center w-full py-3 px-2 bg-white absolute bottom-0 left-0">
                     <input
                         value={input}

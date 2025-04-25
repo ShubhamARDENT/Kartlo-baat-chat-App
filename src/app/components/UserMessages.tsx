@@ -1,11 +1,10 @@
-import axios from 'axios'
-import React, { useEffect, useRef, useState } from 'react'
+
+import React, { useEffect, useRef } from 'react'
 import { Poppins } from "next/font/google";
-import { Send, Users } from 'lucide-react';
-import { IMessages } from './MainChat';
-import { retry } from '@reduxjs/toolkit/query';
 import { useSelector } from 'react-redux';
-import { stat } from 'fs';
+import { IMessages } from './MainChat';
+
+
 
 const poppins = Poppins({
     subsets: ["latin"],
@@ -14,14 +13,15 @@ const poppins = Poppins({
 
 
 
+
 const UserMessages = ({ messages, selectedUserId }:
     {
         selectedUserId: number,
-        messages: []
+        messages: IMessages[]
     }) => {
 
     const { senderId } = useSelector((state) => state.user)
-   
+    console.log(messages, "user msgs")
 
     const messageEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -42,10 +42,6 @@ const UserMessages = ({ messages, selectedUserId }:
     );
 
 
-
-   
-
-
     return (
         <>
             {
@@ -53,7 +49,7 @@ const UserMessages = ({ messages, selectedUserId }:
                     return (
                         <div
                             ref={index === messages.length - 1 ? messageEndRef : null}
-                            key={msg.receiver}
+                            key={index}
                             className={`flex ${msg.sender === senderId ? "justify-end" : "justify-start"} mr-4`}
                         >
                             <span
@@ -61,7 +57,7 @@ const UserMessages = ({ messages, selectedUserId }:
                                     "bg-white text-black"}
                                      ${poppins.className}`}
                             >
-                                {/* <div className="text-sm font-semibold">{msg.sender_username}</div> */}
+
                                 <div>{msg.message}</div>
 
                             </span>

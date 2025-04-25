@@ -2,7 +2,7 @@
 import { createSlice , PayloadAction} from "@reduxjs/toolkit";
 
 
-interface userState {
+ interface userState {
     senderId: number | null,
     senderUsername:string | null
     userMsg:[],

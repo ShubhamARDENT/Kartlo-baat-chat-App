@@ -5,26 +5,28 @@ import axios from 'axios';
 import React, { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
 import { RootState } from '@/store/store';
+import { IReceiver } from '../chats/page';
+import { userInfo } from 'os';
 
 interface IUser {
-    username: string;
     id: number;
+    username: string;
+    password: string
+    email: string
 }
 
 
-interface IConversation {
-    user1_id: number,
-    user2_id: number
-}
 
 const ChatUserList = ({
     isModalOpen,
     setReceiver,
-    UserData
+    UserData,
+    setGroupMembers
 }: {
     isModalOpen?: boolean
-    UserData: IUser[]
-    setReceiver: React.Dispatch<React.SetStateAction<number>>
+    UserData?: IUser[],
+    setGroupMembers: React.Dispatch<React.SetStateAction<IUser[]>>
+    setReceiver?: React.Dispatch<React.SetStateAction<IReceiver | undefined>>
 }) => {
 
     const Fast_API = process.env.NEXT_PUBLIC_Fast_API
@@ -33,7 +35,7 @@ const ChatUserList = ({
     const senderID = useTypedSelector((state) => state.user.senderId);
     const [users, setUsers] = useState<IUser[]>([])
     const [convoList, setConvoList] = useState<any[]>([])
-    
+
     useEffect(() => {
         axios.get(`${Fast_API}/conversations/${senderID}`).then((res) => {
             setConvoList(res.data)
@@ -54,13 +56,20 @@ const ChatUserList = ({
         }
     }
 
+    const Grp = (userInfo: IUser) => {
+        setGroupMembers((prev: IUser[]) => {
+            const filterMembers = prev.some((user) => user.id === userInfo.id)
+            if (filterMembers) return prev
+            return [...prev, userInfo]
+        })
+    }
     // Choose which list to show: search result or convo list
-    const renderList = UserData?.length > 0 ? UserData : convoList
+    const renderList = (UserData ?? []).length > 0 ? UserData : convoList
 
     return (
         <div className='flex flex-col justify-between h-full'>
             <div className='overflow-y-auto'>
-                {renderList.map((user: any) => {
+                {renderList?.map((user: any) => {
                     const userId = user.user1_id && user.user2_id
                         ? (user.user1_id === senderID ? user.user2_id : user.user1_id)
                         : user.id;
@@ -74,7 +83,8 @@ const ChatUserList = ({
                             cursor-pointer hover:bg-[#002670] px-2 py-2`}
                             onClick={() => {
                                 if (!isModalOpen) {
-                                    setReceiver(userInfo)
+                                    setReceiver && setReceiver(userInfo)
+                                    userInfo && Grp(userInfo)
                                     getConvoId(user.user2_id);
                                 }
                             }}
@@ -95,6 +105,7 @@ const ChatUserList = ({
                                     {userInfo?.username || "Unknown"}
                                 </span>
                             </div>
+                            
                         </div>
                     )
                 })}
