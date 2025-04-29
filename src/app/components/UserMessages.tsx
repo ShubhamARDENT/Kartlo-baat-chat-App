@@ -21,7 +21,7 @@ const UserMessages = ({ messages, selectedUserId }:
     }) => {
 
     const { senderId } = useSelector((state) => state.user)
-    console.log(messages, "user msgs")
+
 
     const messageEndRef = useRef<HTMLDivElement | null>(null);
 

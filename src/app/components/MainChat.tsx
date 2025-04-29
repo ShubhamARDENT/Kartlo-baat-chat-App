@@ -24,9 +24,8 @@ export interface IMessages {
 const MainChat = ({ receiver, Group, isActive }: { receiver?: IReceiver, Group?: IGroupChat }) => {
     const [input, setInput] = useState("");
     const socketRef = useRef<WebSocket | null>(null);
-
     const [messages, setMessages] = useState<IMessages[]>([]);
-
+    const [GroupMsgs, setGroupMsgs] = useState([])
     const receiverid = receiver?.id
 
     const senderid = useSelector((state) => state.user.senderId)
@@ -41,7 +40,7 @@ const MainChat = ({ receiver, Group, isActive }: { receiver?: IReceiver, Group?:
         // Determine the WebSocket URL
         let socketURL = ''
 
-        if (Group && isActive === "groups") {
+        if (isActive === "groups") {
             socketURL = `ws://localhost:8000/ws/group/${senderid}`;
         } else if (receiverid && isActive === "friends") {
             socketURL = `ws://localhost:8000/ws/private/${senderid}/${receiverid}`;
@@ -57,14 +56,19 @@ const MainChat = ({ receiver, Group, isActive }: { receiver?: IReceiver, Group?:
             socket.onopen = function (event) {
                 console.log("WebSocket connection established successfully");
             };
-
+            console.log(isActive, "in main chat")
             // Listen for messages
             socket.onmessage = function (event) {
+
                 try {
-                    console.log("Message received:", event.data);
                     const message = JSON.parse(event.data);
-                    console.log(message, "mess")
-                    setMessages(prev => [...prev, message]);
+                    console.log(message)
+                    if (isActive === "groups") {
+                        setGroupMsgs(message)
+                    } else if (isActive === "friends") {
+                        console.log(message)
+                        setMessages(prev => [...prev, message]);
+                    }
                 } catch (e) {
                     console.error("Error parsing message:", e);
                 }
@@ -96,7 +100,8 @@ const MainChat = ({ receiver, Group, isActive }: { receiver?: IReceiver, Group?:
         } catch (err) {
             console.error("Error creating WebSocket:", err);
         }
-    }, [senderid, receiverid]);
+    }, [senderid, receiverid, isActive]);
+
 
     const sendMessage = () => {
         if (

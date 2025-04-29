@@ -79,6 +79,12 @@ const ChatUserList = ({
     }
   };
 
+  const grpsetter = () => {
+    setIsActive('groups')
+    console.log('called')
+    console.log("isActive", isActive)
+  }
+
   const Grp = (userInfo: IUser) => {
     setGroupMembers((prev: IUser[]) => {
       const filterMembers = prev.some((user) => user.id === userInfo.id);
@@ -94,18 +100,7 @@ const ChatUserList = ({
     <div className="flex flex-col justify-between h-full">
       {/* friends and grp */}
       <div className="flex flex-col">
-        <div className="flex justify-around">
-          <span
-            className={isActive === "friends" ? "text-white text-lg cursor-pointer border-b-2 border-solid border-white" :
-              "text-white text-lg cursor-pointer"}
-            onClick={() => setIsActive("friends")}>friends</span>
-          <span
-            className={isActive === "groups" ? "text-white text-lg cursor-pointer border-b-2 border-solid border-white" :
-              "text-white text-lg cursor-pointer"}
-            onClick={() => setIsActive('groups')}>groups</span>
-        </div>
-
-        {isActive === "friends" ? <div className="overflow-y-auto">
+        <div className="overflow-y-auto">
           {renderList?.map((user: any) => {
             const userId =
               user.user1_id && user.user2_id
@@ -146,8 +141,7 @@ const ChatUserList = ({
               </div>
             );
           })}
-        </div> :
-          <GroupChat Group={Group} isModalOpen={isModalOpen} />}
+        </div>
       </div>
 
 
