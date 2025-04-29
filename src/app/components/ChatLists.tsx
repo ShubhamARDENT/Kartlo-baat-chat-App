@@ -99,9 +99,9 @@ const ChatLists = ({ setIsModalOpen, setReceiver, setUserData, UserData, setGrou
                 </div>
                 {/* drop down menu */}
                 <div className={`bg-white absolute ${poppins.className} rounded-md top-[12%] left-[110px] px-3 py-4 ${isVisible ? "flex-col" : "hidden"} `}>
-                    <p className='cursor-pointer hover:text-blue-600'>edit profile</p>
-                    <p className='cursor-pointer hover:text-blue-600'
-                        onClick={handleOpenModal}> create a group</p>
+                    {/* <p className='cursor-pointer hover:text-blue-600'>edit profile</p> */}
+                    {/* <p className='cursor-pointer hover:text-blue-600'
+                        onClick={handleOpenModal}> create a group</p> */}
                     <p className='cursor-pointer hover:text-blue-600' onClick={() => router.push('/login')}>log out</p>
                 </div>
             </div>
