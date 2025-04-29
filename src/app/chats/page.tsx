@@ -6,9 +6,8 @@ import Modal from "../components/Modal";
 import ChatUserList from "../components/ChatUserList";
 import Doodles from "../components/Doodles";
 import axios from "axios";
-import { useSelector } from "react-redux";
-import RoomChat from "../roomchat/roomchat";
-import { group } from "console";
+
+import { IGroupChat } from "../components/GroupChat";
 
 export interface IReceiver {
   id: number;
@@ -27,20 +26,29 @@ export default function Chats() {
   const [groupMembers, setGroupMembers] = useState<IReceiver[]>([]);
   const [UserData, setUserData] = useState<IUser[]>([]);
   const [groupName, setGroupName] = useState("");
+  const [Group, setGroup] = useState<IGroupChat>()
+  const [isActive, setIsActive] = useState<"friends" | "groups">("friends");
 
-
-  
   return (
     <>
       <div className="flex h-[100vh]">
         <ChatLists
+          setIsActive={setIsActive}
+          isActive={isActive}
+          Group={Group}
+          setGroup={setGroup}
           setReceiver={setReceiver}
           setIsModalOpen={setIsModalOpen}
           setUserData={setUserData}
-          
+          setGroupMembers={setGroupMembers}
           UserData={UserData}
         />
-        {receiver ? <MainChat receiver={receiver} /> : <Doodles />}
+
+        {(receiver || (Group && Group.group_id)) ? (
+          <MainChat receiver={receiver} Group={Group} isActive={isActive} />
+        ) : (
+          <Doodles />
+        )}
       </div>
 
       <Modal
@@ -52,7 +60,14 @@ export default function Chats() {
         setGroupName={setGroupName}
         groupName={groupName}
       >
-        <ChatUserList setGroupMembers={setGroupMembers} UserData={UserData} groupMembers={groupMembers}/>
+        <ChatUserList
+          isActive={isActive}
+          setIsActive={setIsActive}
+          setGroupMembers={setGroupMembers}
+          UserData={UserData}
+          groupMembers={groupMembers}
+          Group={Group}
+          setGroup={setGroup} />
       </Modal>
     </>
   );

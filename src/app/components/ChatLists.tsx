@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation'
 import { useSelector } from 'react-redux'
 import axios from "axios"
 import { IReceiver, IUser } from '../chats/page'
+import { IGroupChat } from './GroupChat'
+
 
 const poppins = Poppins({
     subsets: ['latin'],
@@ -16,11 +18,14 @@ const poppins = Poppins({
 })
 
 
-const ChatLists = ({ setIsModalOpen, setReceiver, setUserData, UserData }: {
-    setReceiver: React.Dispatch<React.SetStateAction<IReceiver | undefined>>
+const ChatLists = ({ setIsModalOpen, setReceiver, setUserData, UserData, setGroupMembers, setGroup, Group, setIsActive, isActive }: {
+    setReceiver?: React.Dispatch<React.SetStateAction<IReceiver | undefined>>;
+    setGroupMembers: React.Dispatch<React.SetStateAction<IUser[]>>
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>
     setUserData: React.Dispatch<React.SetStateAction<IUser[]>>
-    UserData:IUser[]
+    setGroup: React.Dispatch<React.SetStateAction<IGroupChat[]>>
+    UserData: IUser[]
+    Group: IGroupChat[]
 }) => {
     const FastApi = process.env.NEXT_PUBLIC_Fast_API
 
@@ -80,7 +85,7 @@ const ChatLists = ({ setIsModalOpen, setReceiver, setUserData, UserData }: {
     }, [userName]);
 
 
-    
+
 
     return (
         <div className='bg-[#001030] w-[25%] '>
@@ -110,7 +115,13 @@ const ChatLists = ({ setIsModalOpen, setReceiver, setUserData, UserData }: {
             </div>
             {/* user list */}
             <div className='mt-10 flex flex-col gap-y-5 '>
-                <ChatUserList setReceiver={setReceiver} UserData={UserData} />
+                <ChatUserList setReceiver={setReceiver}
+                    UserData={UserData}
+                    setGroupMembers={setGroupMembers}
+                    setGroup={setGroup}
+                    Group={Group}
+                    isActive={isActive}
+                    setIsActive={setIsActive} />
             </div>
 
 

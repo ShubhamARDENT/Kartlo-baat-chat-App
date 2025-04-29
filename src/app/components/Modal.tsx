@@ -66,6 +66,8 @@ const Modal = ({
         group_name: groupName,
         member_ids: memberIds,
       });
+
+      
     } catch (error) {
       console.log(error, "error creating grp");
     }

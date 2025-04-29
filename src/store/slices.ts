@@ -6,6 +6,7 @@ import { createSlice , PayloadAction} from "@reduxjs/toolkit";
     senderId: number | null,
     senderUsername:string | null
     userMsg:[],
+    GroupName:string | null
     userConversation:number | string
 }
 
@@ -13,7 +14,8 @@ const initialState : userState ={
     senderId:null,
     senderUsername:null,
     userMsg: [], 
-    userConversation: 0   
+    userConversation: 0, 
+    GroupName:null, 
 }
 
 const userSlice = createSlice({
@@ -34,10 +36,13 @@ const userSlice = createSlice({
         },
         setUserConversation:(state,action)=>{
           state.userConversation = action.payload
+        },
+        setGroupName:(state,action) => {
+          state.GroupName = action.payload
         }
       },
 })
 
 
-export const { setSenderId , clearSenderId ,setUserMessage ,setUserConversation ,setSenderName } = userSlice.actions;
+export const { setSenderId , clearSenderId ,setUserMessage ,setUserConversation ,setSenderName , setGroupName } = userSlice.actions;
 export default userSlice.reducer;
