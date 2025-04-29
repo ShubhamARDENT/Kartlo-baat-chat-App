@@ -39,10 +39,14 @@ const MainChat = ({ receiver, Group, isActive }: { receiver?: IReceiver, Group?:
         }
 
         // Determine the WebSocket URL
-        // const socketURL = groupChat
-        //     ? `ws://localhost:8000/ws/group/${groupChat}`
-        //     : `ws://localhost:8000/ws/private/${senderid}/${receiverid}`;
-        const socketURL = `ws://localhost:8000/ws/private/${senderid}/${receiverid}`;
+        let socketURL = ''
+
+        if (Group && isActive === "groups") {
+            socketURL = `ws://localhost:8000/ws/group/${senderid}`;
+        } else if (receiverid && isActive === "friends") {
+            socketURL = `ws://localhost:8000/ws/private/${senderid}/${receiverid}`;
+        }
+
 
         // Create the WebSocket connection
         try {
@@ -95,9 +99,15 @@ const MainChat = ({ receiver, Group, isActive }: { receiver?: IReceiver, Group?:
     }, [senderid, receiverid]);
 
     const sendMessage = () => {
-        if (socketRef.current && input) {
+        if (
+            socketRef.current &&
+            socketRef.current.readyState === WebSocket.OPEN &&
+            input.trim()
+        ) {
             socketRef.current.send(input);
             setInput('');
+        } else {
+            console.warn("WebSocket is not open. Message not sent.");
         }
     };
 
